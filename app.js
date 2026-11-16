@@ -17,10 +17,8 @@ const ICO={
 };
 const AT='<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>';
 const REDES=[
-  {id:"instagram",label:"Instagram",base:"https://www.instagram.com/"},
-  {id:"x",label:"X",base:"https://x.com/"},
-  {id:"tiktok",label:"TikTok",base:"https://www.tiktok.com/@"},
-  {id:"facebook",label:"Facebook",base:"https://www.facebook.com/"}
+  {id:"instagram",label:"Instagram",base:"https://www.instagram.com/"}
+  /* Para sumar más redes: {id:"x",label:"X",base:"https://x.com/"}, {id:"tiktok",label:"TikTok",base:"https://www.tiktok.com/@"}, {id:"facebook",label:"Facebook",base:"https://www.facebook.com/"} */
 ];
 const BAJADA={falopas:"Lo insólito del país, tal cual pasó. No es joda, aunque parezca."};
 const RLABEL=Object.fromEntries(RUBROS.map(r=>[r.id,r.label]));
