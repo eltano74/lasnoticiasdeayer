@@ -1,4 +1,4 @@
-# Las Noticias de Ayer
+# La Hoja de Ayer
 
 Sitio estático. No hay que compilar nada: GitHub Pages sirve los archivos tal cual.
 

@@ -1,4 +1,4 @@
-# Fuentes de Las Noticias de Ayer
+# Fuentes de La Hoja de Ayer
 
 La actualización diaria lee este archivo. Para sumar un medio, agregá una línea en la sección que corresponda.
 

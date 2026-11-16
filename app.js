@@ -1,4 +1,4 @@
-/* Las Noticias de Ayer — versión pública. Lee data/index.json y data/ediciones/AAAA-MM-DD.json */
+/* La Hoja de Ayer — versión pública. Lee data/index.json y data/ediciones/AAAA-MM-DD.json */
 const RUBROS=[
   {id:"politica",label:"Política"},
   {id:"economia",label:"Economía"},
