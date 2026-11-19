@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-11-18T11:16:17+00:00",
+ "actualizado": "2026-11-19T11:16:20+00:00",
  "config": {
   "eslogan": "Lo que pasó, en un solo lugar.",
   "redes": {
@@ -102,6 +102,17 @@
     "economia": 5,
     "entretenimiento": 3,
     "espectaculos": 4,
+    "falopas": 3,
+    "politica": 4
+   }
+  },
+  "2026-11-18": {
+   "total": 25,
+   "rubros": {
+    "deporte": 5,
+    "economia": 5,
+    "entretenimiento": 3,
+    "espectaculos": 5,
     "falopas": 3,
     "politica": 4
    }
