@@ -25,7 +25,7 @@ const RLABEL=Object.fromEntries(RUBROS.map(r=>[r.id,r.label]));
 const DIAS=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
 const MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 
-const state={index:null,cache:{},rubro:"todas",day:null,view:"dia"};
+const state={index:null,cache:{},rubro:"todas",day:null,view:"dia",ha:null,haCache:{},nota:null};
 const $=id=>document.getElementById(id);
 
 function icon(id){return ICO[id]?`<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICO[id]}</svg>`:""}
@@ -66,6 +66,57 @@ function sectionHtml(id,items){
   return `<section class="rubro${id==="falopas"?" falopa":""}" style="--rc:var(--c-${id})"><h3>${icon(id)}${RLABEL[id]||id}</h3>${baj}<div class="grid">${items.map(n=>card(n)).join("")}</div></section>`;
 }
 
+/* ---- Hoja Abierta: notas de la editora (data/editora/index.json + data/editora/<slug>.json) ---- */
+function inlineMd(t){
+  t=esc(t);
+  t=t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,(m,a,u)=>{const h=safeUrl(u.replace(/&amp;/g,"&"));return h==="#"?a:`<a href="${esc(h)}" target="_blank" rel="noopener">${a}</a>`});
+  t=t.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>").replace(/\*([^*]+)\*/g,"<em>$1</em>");
+  return t;
+}
+function mdToHtml(md){
+  const out=[];let list=null;
+  const close=()=>{if(list){out.push(`</${list}>`);list=null}};
+  for(const raw of String(md||"").split(/\n/)){
+    const l=raw.trim();
+    if(!l){close();continue}
+    let m;
+    if((m=l.match(/^#{2,3}\s+(.*)/))){close();out.push(`<h3>${inlineMd(m[1])}</h3>`)}
+    else if((m=l.match(/^[-*]\s+(.*)/))){if(list!=="ul"){close();out.push("<ul>");list="ul"}out.push(`<li>${inlineMd(m[1])}</li>`)}
+    else if((m=l.match(/^\d+\.\s+(.*)/))){if(list!=="ol"){close();out.push("<ol>");list="ol"}out.push(`<li>${inlineMd(m[1])}</li>`)}
+    else{close();out.push(`<p>${inlineMd(l)}</p>`)}
+  }
+  close();return out.join("");
+}
+function shortDate(s){const d=parseDay(s);return `${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}`}
+async function loadHA(){
+  if(state.ha) return state.ha;
+  try{const r=await fetch("data/editora/index.json",{cache:"no-cache"});state.ha=r.ok?(await r.json()).notas||[]:[]}catch(e){state.ha=[]}
+  state.ha.sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  return state.ha;
+}
+function teaserHtml(){
+  const n=state.ha?.[0];if(!n) return "";
+  return `<button class="teaser" data-nota="${esc(n.slug)}"><span class="k">Hoja Abierta · nota de la editora</span><b>${esc(n.titulo)}</b><span class="go">Leer →</span></button>`;
+}
+async function renderHA(){
+  const list=await loadHA();
+  $("stampDate").textContent="Hoja Abierta";$("stampCount").textContent="Notas de la editora";
+  let html=`<div class="ha"><div class="ha-head"><div><h3>Hoja Abierta</h3><p>Notas de la editora: preguntas incómodas sobre el país, para pensarlas juntos.</p></div><button class="btn ghost" id="backDay">Volver a la edición</button></div>`;
+  if(!list.length) html+=`<p class="empty">Muy pronto, la primera nota.</p>`;
+  html+=list.map(n=>`<button class="ha-item" data-nota="${esc(n.slug)}"><span class="f">${esc(shortDate(n.fecha))}${n.tema?" · "+esc(n.tema):""}</span><b>${esc(n.titulo)}</b>${n.bajada?`<p>${esc(n.bajada)}</p>`:""}</button>`).join("");
+  $("main").innerHTML=html+`</div>`;
+}
+async function renderNota(){
+  const slug=state.nota;
+  let n=state.haCache[slug];
+  if(!n){try{const r=await fetch(`data/editora/${encodeURIComponent(slug)}.json`,{cache:"no-cache"});if(!r.ok)throw 0;n=state.haCache[slug]=await r.json()}catch(e){$("main").innerHTML=`<p class="status">No se encontró esa nota.</p>`;return}}
+  if(state.view!=="nota"||state.nota!==slug) return;
+  $("stampDate").textContent="Hoja Abierta";$("stampCount").textContent=shortDate(n.fecha);
+  document.title=`${n.titulo} · La Hoja de Ayer`;
+  $("main").innerHTML=`<article class="editorial"><div class="kicker">Hoja Abierta · nota de la editora${n.tema?" · "+esc(n.tema):""}</div><h2 class="t">${esc(n.titulo)}</h2>${n.bajada?`<p class="baj">${esc(n.bajada)}</p>`:""}<div class="firma">${esc(n.firma||"La editora")} · ${esc(shortDate(n.fecha))}</div><div class="body">${mdToHtml(n.cuerpo)}</div><div class="back"><button class="btn ghost" id="openHA2">Más notas de Hoja Abierta</button> <button class="btn ghost" id="backDay">Volver a la edición</button></div></article>`;
+  scrollTo(0,0);
+}
+
 async function loadDay(d){
   if(!state.cache[d]){
     const r=await fetch(`data/ediciones/${d}.json`,{cache:"no-cache"});
@@ -97,7 +148,7 @@ async function renderDay(){
     if(lead) html+=card(lead,true);
     for(const r of RUBROS){const items=list.filter(n=>n.rubro===r.id&&n!==lead);if(items.length) html+=sectionHtml(r.id,items)}
   } else html=sectionHtml(state.rubro,list);
-  $("main").innerHTML=html;
+  $("main").innerHTML=(state.rubro==="todas"?teaserHtml():"")+html;
 }
 function renderArchive(){
   const counts={};
@@ -118,13 +169,17 @@ function renderArchive(){
 function render(){
   renderTabs();
   if(!state.index) return;
-  if(state.view==="archivo") renderArchive(); else renderDay();
-  const h=state.view==="archivo"?"#archivo":(state.day&&state.day!==days().at(-1)?"#"+state.day:"");
+  if(state.view!=="nota") document.title="La Hoja de Ayer";
+  $("stampK").textContent=(state.view==="ha"||state.view==="nota")?"Sección":"Edición del";
+  if(state.view==="archivo") renderArchive(); else if(state.view==="ha") renderHA(); else if(state.view==="nota") renderNota(); else renderDay();
+  const h=state.view==="archivo"?"#archivo":state.view==="ha"?"#hoja-abierta":state.view==="nota"?"#hoja-abierta-"+state.nota:(state.day&&state.day!==days().at(-1)?"#"+state.day:"");
   if(location.hash!==h) history.replaceState(null,"",h||location.pathname);
 }
 function fromHash(){
   const h=location.hash.slice(1);
   if(h==="archivo") state.view="archivo";
+  else if(h==="hoja-abierta") state.view="ha";
+  else if(h.startsWith("hoja-abierta-")){state.view="nota";state.nota=h.slice(13)}
   else if(/^\d{4}-\d{2}-\d{2}$/.test(h)){state.day=h;state.view="dia"}
 }
 
@@ -133,8 +188,11 @@ $("prevDay").onclick=()=>{const ds=days(),i=ds.indexOf(state.day);if(i>0){state.
 $("nextDay").onclick=()=>{const ds=days(),i=ds.indexOf(state.day);if(i<ds.length-1){state.day=ds[i+1];state.view="dia";render();scrollTo(0,0)}};
 $("dayPick").onchange=e=>{const v=e.target.value;if(!v)return;if(!days().includes(v)){$("dayPick").value=state.day||"";$("stampCount").textContent="No hay edición para esa fecha.";return}state.day=v;state.view="dia";render()};
 $("openArchive").onclick=()=>{state.view="archivo";render()};
+$("openHA").onclick=()=>{state.view="ha";render();scrollTo(0,0)};
 $("main").addEventListener("click",e=>{
   const d=e.target.closest(".dia");if(d){state.day=d.dataset.day;state.view="dia";render();scrollTo(0,0);return}
+  const t=e.target.closest("[data-nota]");if(t){state.nota=t.dataset.nota;state.view="nota";render();return}
+  if(e.target.id==="openHA2"){state.view="ha";render();scrollTo(0,0);return}
   if(e.target.id==="backDay"){state.view="dia";render()}
 });
 addEventListener("hashchange",()=>{fromHash();render()});
@@ -146,5 +204,5 @@ renderTabs();renderSocial();
     state.index=await r.json();
   }catch(e){$("main").innerHTML=`<p class="status">No se pudieron cargar las noticias. Probá recargar la página.</p>`;return}
   if(state.index.config?.eslogan) $("slogan").textContent=state.index.config.eslogan;
-  renderSocial();fromHash();render();
+  renderSocial();await loadHA();fromHash();render();
 })();
