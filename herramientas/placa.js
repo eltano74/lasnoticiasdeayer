@@ -1,6 +1,6 @@
 // Genera la placa de Instagram (modelo B) de La Hoja de Ayer.
 // Uso: node herramientas/placa.js nota.json salida.png [posteo|historia]
-// nota.json: {"titulo","bajada","rubro","fecha","fuente"}
+// nota.json: {"titulo","bajada","rubro","fecha","fuente"} (opcional "pie": reemplaza la línea "Fuente: ...", p. ej. "Nota de la editora")
 const {chromium}=require('playwright');const fs=require('fs');
 const [,,notaPath,out,formato='posteo']=process.argv;
 const N=JSON.parse(fs.readFileSync(notaPath,'utf8'));
@@ -14,7 +14,7 @@ const html=(t,b)=>`<html><head><style>*{box-sizing:border-box;margin:0}body{font
 <span class="k" style="font-size:28px;color:#FFD84D">${esc(N.rubro)} · ${esc(N.fecha)}</span>
 <div id="t" style="font-weight:800;font-size:${t}px;line-height:.98;letter-spacing:-.035em">${esc(N.titulo)}</div>
 <div id="b" style="font-family:'DejaVu Serif',serif;font-size:${b}px;line-height:1.4;opacity:.92">${esc(N.bajada)}</div>
-<div id="f" style="margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:20px"><span class="k" style="font-size:22px;opacity:.75">Fuente: ${esc(N.fuente)}</span><span class="k" style="font-size:26px;background:#fff;color:#2340B8;padding:16px 26px;border-radius:999px;white-space:nowrap">LAHOJADEAYER.COM.AR</span></div>
+<div id="f" style="margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:20px"><span class="k" style="font-size:22px;opacity:.75">${esc(N.pie||("Fuente: "+N.fuente))}</span><span class="k" style="font-size:26px;background:#fff;color:#2340B8;padding:16px 26px;border-radius:999px;white-space:nowrap">LAHOJADEAYER.COM.AR</span></div>
 </div></body></html>`;
 (async()=>{const br=await chromium.launch();const p=await br.newPage({viewport:{width:1080,height:H}});
 let t=story?156:132,b=story?52:46;
