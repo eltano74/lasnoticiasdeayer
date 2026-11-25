@@ -1,6 +1,12 @@
 # Efemérides de diciembre 2026 — textos para Instagram
 Publicación manual (no van por Metricool). Sugerido: el mismo día, entre las 12 y las 13.
 
+## 8/12 — Día de la Inmaculada Concepción
+Día de la Virgen: arbolito y pesebre 🎄✨
+Cada 8 de diciembre se celebra la Inmaculada Concepción de María, feriado nacional. Y por tradición, es el día de armar el arbolito y el pesebre.
+¿Ya armaste el tuyo? Mostranos en los comentarios 👇
+#LaHojaDeAyer #Efemérides #8DeDiciembre #Arbolito
+
 ## 9/12 — Ayacucho (1824)
 Ayacucho: la batalla que cerró la independencia ⚔️🇦🇷
 Un 9 de diciembre de 1824, en las sierras de Perú, el ejército de Sucre derrotó al último gran ejército realista. Fue el final del dominio español en Sudamérica.
